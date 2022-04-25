@@ -1,0 +1,1 @@
+Drawing multiple rectangles with mouse dragging on the image 
