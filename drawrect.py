@@ -1,10 +1,13 @@
 import sys
 
-import cv2  # Opencv ver 3.1.0 used
+import cv2  # Opencv ver 4.5.5 
 import numpy as np
+import pickle
 
 # Set recursion limit
 sys.setrecursionlimit(10 ** 9)
+
+file_name = "sample.pkl"
 
 drawing = False # true if mouse is pressed
 mode = True # if True, draw rectangle. Press 'm' to  
@@ -15,8 +18,6 @@ im_height = 480
 image = np.ones([im_height, im_width, 3], dtype=np.uint8)  # OR read an image using imread()
 image *= 255
 clone = image.copy()
-
-rects = []
 
 class Rect:
     x1 = None
@@ -55,6 +56,12 @@ def onMouse(event, x, y, flags, param):
         else:
             cv2.circle(image,(x,y),5,(0,0,255),-1)
 
+open_file = open(file_name,"rb")
+if open_file is None:
+    rects = []
+else:
+    rects = pickle.load(open_file)
+    print(rects[0])
 
 
 # Initialize the  drag object
@@ -77,6 +84,10 @@ while True:
     # return if 'Esc' key clicked
     if key == ord('m'):
         mode = not mode
+    elif key == ord('s'):
+        open_file = open(file_name,"wb")
+        pickle.dump(rects,open_file)
+        open_file.close()
     elif key == 0x1b:
         break
 
