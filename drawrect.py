@@ -4,13 +4,14 @@ import pickle
 from os.path import exists
 import sys
 
-from recthandler import Rect 
+from recthandler import Rect, isDragRect 
 import recthandler
 
 file_name = "sample.pkl"
 
 drawing = False # true if mouse is pressed
-shape_mode = True # if True, draw rectangle. Press 'm' to  
+resizing = False # true if marker area is pressed
+shape_mode = True # if true, draw rectangle. Press 'm' to change drawing shape   
 box_selected = False 
 active_rect = -1
 ix, iy = -1, -1
@@ -27,7 +28,7 @@ def rectAssign(x1, y1, x2, y2):
     return temp_rect 
 
 def onMouse(event, x, y, flags, param):
-    global ix,iy,drawing,shape_mode,active_rect,image,clone,rect_list,current_id,box_selected
+    global ix,iy,drawing,resizing,shape_mode,active_rect,image,current_id,box_selected
 
     if event == cv2.EVENT_LBUTTONDOWN:
         box_selected = False
@@ -43,8 +44,10 @@ def onMouse(event, x, y, flags, param):
 
         if box_selected == True:
             print("inside box:",active_rect)
+            corner = calcDragCorner(x,y,rects[active_rect])
         else:
             drawing = True
+            resizing = False
             ix,iy = x,y
             
     if event == cv2.EVENT_MOUSEMOVE:
@@ -54,6 +57,8 @@ def onMouse(event, x, y, flags, param):
                 cv2.rectangle(image,(ix,iy),(x,y),(0,255,0),1)
             else:
                 cv2.circle(image,(x,y),5,(0,0,255),-1)
+        # else:
+        #     if resizing == True:
 
     if event == cv2.EVENT_LBUTTONUP:
         if drawing == True:
@@ -95,10 +100,12 @@ cv2.setMouseCallback(w_name, onMouse)
 while True:
 
     # draw save rectangles on the image 
+    image = clone.copy()
     for id,rect in enumerate(rects):
         if active_rect == id:
             cv2.rectangle(image,(rect.x1,rect.y1),(rect.x2,rect.y2),(0,0,255),1)
             cv2.putText(image,str(id),(rect.x2,rect.y2),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2,cv2.LINE_4)
+            image = recthandler.drawSelectMarkers(image,rect)
         else:
             cv2.rectangle(image,(rect.x1,rect.y1),(rect.x2,rect.y2),(0,255,0),1)
             cv2.putText(image,str(id),(rect.x2,rect.y2),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),2,cv2.LINE_4)
